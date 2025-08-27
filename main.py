@@ -7,11 +7,11 @@ from neural_network import NeuralNetwork
 from utils import evaluate_model
 
 input_size = 784
-hidden_size = 32
+hidden_size = 128
 output_size = 10
-learning_rate = 0.01
+learning_rate = 0.063
 batch_size = 64
-epochs = 10
+cycles = 20
 
 def main():
 
@@ -26,12 +26,12 @@ def main():
     num_samples = train_images.shape[0]
     num_batches = num_samples // batch_size
 
-    print(f"Starting training for {epochs} epochs...")
+    print(f"Starting training for {cycles} cycles...")
 
-    for epoch in range(epochs):
+    for cycle in range(cycles):
         start_time = time.time()
-        epoch_loss = 0
-        epoch_accuracy = 0
+        cycle_loss = 0
+        cycle_accuracy = 0
 
         indices = np.random.permutation(num_samples)
         images = train_images[indices]
@@ -45,21 +45,22 @@ def main():
             y_batch = labels[batch_start:batch_end]
 
             loss, accuracy = neural_network.train_step(x_batch, y_batch)
-            epoch_loss += loss
-            epoch_accuracy += accuracy
+            cycle_loss += loss
+            cycle_accuracy += accuracy
 
             if (batch + 1) % 100 == 0:
-                print(f"Epoch {epoch + 1}/{epochs}, Batch {batch + 1}/{num_batches}, Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
+                print(f"cycle {cycle + 1}/{cycles}, Batch {batch + 1}/{num_batches}, Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
 
         test_accuracy, test_loss = evaluate_model(neural_network, test_images, test_labels)
 
-        epoch_time = time.time() - start_time
+        cycle_time = time.time() - start_time
         print(
-            f"Expoch {epoch + 1}/{epochs} completed in {epoch_time:.2f}s"
-            f"Avg. Loss: {epoch_loss/num_batches:.4f}"
-            f"Avg. Accuracy: {epoch_accuracy/num_batches:.4f}%"
+            f"Cycle {cycle + 1}/{cycles} completed in {cycle_time:.2f}s"
+            f"Avg. Loss: {cycle_loss/num_batches:.4f}"
+            f"Avg. Accuracy: {cycle_accuracy/num_batches:.4f}%"
             f"Test Loss: {test_loss:.4f}"
             f"Test Accuracy: {test_accuracy:.4f}%"
+            f"Learning rate: {neural_network.learning_rate}"
         )
     
     print("Training completed")

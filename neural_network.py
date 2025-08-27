@@ -4,9 +4,9 @@ from utils import calculate_loss, calculate_accuracy
 class NeuralNetwork:
         def __init__(self, input_size, hidden_size, output_size, learning_rate=0.01):
             
-            self.w1 = np.random.randn(input_size, hidden_size) * np.sqrt(1 / input_size)
+            self.w1 = np.random.randn(input_size, hidden_size) * np.sqrt(2 / input_size)
             self.b1 = np.zeros((1, hidden_size))
-            self.w2 = np.random.randn(hidden_size, output_size) * np.sqrt(1 / hidden_size)
+            self.w2 = np.random.randn(hidden_size, output_size) * np.sqrt(2 / hidden_size)
             self.b2 = np.zeros((1, output_size))
             self.learning_rate = learning_rate
 
@@ -69,6 +69,8 @@ class NeuralNetwork:
             self.update_parameters(gradients)
             loss = calculate_loss(output, y)
             accuracy = calculate_accuracy(np.argmax(output, axis=1), y)
+
+            self.learning_rate *= 0.9999
 
             return loss, accuracy
         
