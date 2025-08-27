@@ -35,7 +35,7 @@ With the default settings, the model should achieve around 97% accuracy on the t
 
 - Python 3.x
 - NumPy
-- Keras (only for downloading MNIST data)
+- tensorflow-datasets (only for downloading MNIST data)
 
 ### Installation
 

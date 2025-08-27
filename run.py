@@ -22,10 +22,15 @@ def load_model():
 def preprocess_image(image_path):
     image = Image.open(image_path).convert("L")
     image = image.resize((28, 28))
+
+    # Invert colors: make digits white on black
     image = ImageOps.invert(image)
+
+    # Normalize to 0–1
     image_array = np.array(image) / 255.0
 
-    flattened = image_array.reshape(1, 784)
+    # Flatten to match model input
+    flattened = image_array.reshape(1, 784).astype(np.float32)
 
     return flattened
 
