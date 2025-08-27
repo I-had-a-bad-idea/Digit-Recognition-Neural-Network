@@ -14,6 +14,21 @@ This project implements a feedforward neural network with one hidden layer to cl
 - Loss function: Cross-entropy loss
 - Learning rate: 0.063 with decay
 
+## Hyperparameters
+
+The default hyperparameters are:
+- Learning rate: 0.063
+- Batch size: 64
+- Number of epochs: 20
+- Hidden layer size: 128
+
+You can modify these in the `train.py` file to experiment with different settings.
+
+## Results
+
+With the default settings, the model should achieve around 97% accuracy on the test set.
+
+
 ## Getting Started
 
 ### Prerequisites
@@ -39,13 +54,13 @@ python data/get_data.py
 
 To train the network:
 ```sh
-python main.py
+python train.py
 ```
 
 The model will:
 - Train for 20 cycles
 - Use batch size of 64
-- Save the trained model parameters in the `models/` directory
+- Save the trained model parameters in the `model/` directory
 
 ## Project Structure
 
@@ -53,11 +68,11 @@ The model will:
 ├── data/                  # Dataset directory
 │   ├── get_data.py       # Script to download MNIST data
 │   └── *.npy             # MNIST data files
-├── models/               # Saved model parameters
+├── model/               # Saved model parameters
 ├── data_loader.py       # Data loading utilities
 ├── neural_network.py    # Neural network implementation
 ├── utils.py             # Helper functions
-└── main.py             # Training script
+└── train.py             # Training script
 ```
 
 ## License

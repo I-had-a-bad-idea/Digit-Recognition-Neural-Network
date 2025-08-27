@@ -13,7 +13,7 @@ learning_rate = 0.063
 batch_size = 64
 cycles = 20
 
-def main():
+def train():
 
     print("Loading MNIST dataset...")
     train_images, train_labels, test_images, test_labels = load_data()
@@ -55,12 +55,12 @@ def main():
 
         cycle_time = time.time() - start_time
         print(
-            f"Cycle {cycle + 1}/{cycles} completed in {cycle_time:.2f}s"
-            f"Avg. Loss: {cycle_loss/num_batches:.4f}"
-            f"Avg. Accuracy: {cycle_accuracy/num_batches:.4f}%"
-            f"Test Loss: {test_loss:.4f}"
-            f"Test Accuracy: {test_accuracy:.4f}%"
-            f"Learning rate: {neural_network.learning_rate}"
+            f"Cycle {cycle + 1}/{cycles} completed in {cycle_time:.2f}s "
+            f"Avg. Loss: {cycle_loss/num_batches:.4f} "
+            f"Avg. Accuracy: {cycle_accuracy/num_batches:.4f}% "
+            f"Test Loss: {test_loss:.4f} "
+            f"Test Accuracy: {test_accuracy:.4f}% "
+            f"Learning rate: {neural_network.learning_rate} "
         )
     
     print("Training completed")
@@ -71,13 +71,12 @@ def main():
 
     print("Saving network parameters...")
     os.makedirs("models", exist_ok=True)
-    np.save("models/w1.npy", neural_network.w1)
-    np.save("models/b1.npy", neural_network.b1)
-    np.save("models/w2.npy", neural_network.w2)
-    np.save("models/b2.npy", neural_network.b2)
+    np.save("model/w1.npy", neural_network.w1)
+    np.save("model/b1.npy", neural_network.b1)
+    np.save("model/w2.npy", neural_network.w2)
+    np.save("model/b2.npy", neural_network.b2)
     
     print("Model saved")
 
 
-if __name__ == "__main__":
-    main()
+train()
