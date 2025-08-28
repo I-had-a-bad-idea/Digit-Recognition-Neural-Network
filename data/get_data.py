@@ -3,8 +3,8 @@ import tensorflow_datasets as tfds
 
 
 # Load the MNIST Corrupted dataset (e.g., 'mnist_corrupted/gaussian_noise')
-ds_train = tfds.load("mnist_corrupted", split="train", as_supervised=True)
-ds_test = tfds.load("mnist_corrupted", split="test", as_supervised=True)
+ds_train = tfds.load("emnist/digits", split="train", as_supervised=True)
+ds_test = tfds.load("emnist/digits", split="test", as_supervised=True)
 
 # Convert to NumPy arrays
 def to_numpy(dataset):
