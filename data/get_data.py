@@ -35,4 +35,4 @@ np.save("data/train_images.npy", x_train)
 np.save("data/test_images.npy", x_test)
 np.save("data/test_labels.npy", y_test_one_hot)
 
-print("MNIST-Corrupted dataset has been saved as .npy files!")
+print("EMNIST/digit dataset has been saved as .npy files!")

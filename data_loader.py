@@ -11,8 +11,3 @@ def load_data():
 
     return train_images, train_labels, test_images, test_lables
 
-
-def get_batch(images, labels, batch_size):
-
-    indices = np.random.permutation(images.shape[0][:batch_size])
-    return images[indices], labels[indices]

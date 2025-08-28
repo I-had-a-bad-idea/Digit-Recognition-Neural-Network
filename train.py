@@ -2,14 +2,14 @@ import numpy as np
 import time
 import os
 
-from data_loader import load_data, get_batch
+from data_loader import load_data
 from neural_network import NeuralNetwork
 from utils import evaluate_model
 
 input_size = 784
 hidden_size = 128
 output_size = 10
-learning_rate = 0.063
+learning_rate = 0.5 # 0.5 = Final Test Accuracy: 98.87-98.91
 batch_size = 64
 cycles = 20
 
