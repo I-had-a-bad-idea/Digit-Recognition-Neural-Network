@@ -78,7 +78,6 @@ class NeuralNetwork:
         loss = calculate_loss(output, y)
         accuracy = calculate_accuracy(np.argmax(output, axis=1), y)
 
-        self.learning_rate *= 0.9999
         return loss, accuracy
 
     def predict(self, x):

@@ -47,6 +47,7 @@ def train():
             y_batch = labels[batch_start:batch_end]
 
             loss, accuracy = neural_network.train_step(x_batch, y_batch)
+            neural_network.learning_rate = learning_rate * (0.5 * (1 + np.cos(np.pi * cycle / cycles)))
             cycle_loss += loss
             cycle_accuracy += accuracy
 
