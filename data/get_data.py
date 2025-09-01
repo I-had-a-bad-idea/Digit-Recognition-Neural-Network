@@ -1,8 +1,5 @@
 import numpy as np
 import tensorflow_datasets as tfds
-from PIL import Image, ImageEnhance, ImageChops
-import random
-import cv2
 import os
 os.makedirs("data", exist_ok=True)
 
@@ -18,7 +15,7 @@ augmented_digits_generator = Augmented_digits_generator()
 
 print("Generating augmented digits...")
 # Generate synthetic digits from PNGs
-x_extra, y_extra = augmented_digits_generator.generate_augmented_data("E:/Digit-Recognition-Neural-Network/data/external_digits", samples_per_image=100)
+x_extra, y_extra = augmented_digits_generator.generate_augmented_data("E:/Digit-Recognition-Neural-Network/data/external_digits", samples_per_image=1000)
 print("Generated augmented pictures!")
 
 # Convert dataset to NumPy

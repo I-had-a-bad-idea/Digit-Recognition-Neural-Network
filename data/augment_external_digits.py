@@ -1,7 +1,9 @@
 import os
 import numpy as np
-from PIL import Image, ImageEnhance, ImageFilter, ImageChops
-import random
+from PIL import Image, ImageEnhance, ImageFilter, ImageChops, ImageOps
+import random, cv2
+from scipy.ndimage import gaussian_filter, map_coordinates
+
 
 class Augmented_digits_generator:
     def preprocess_digit(self, arr):
@@ -38,43 +40,87 @@ class Augmented_digits_generator:
 
         return (canvas.astype(np.float32) / 255.0).reshape(784)
 
+    def elastic_transform(self, image, alpha: float = 36.0, sigma: float = 6.0):
+        arr = np.array(image)
+
+        random_state = np.random.RandomState(None)
+        shape = arr.shape
+
+        dx = gaussian_filter((random_state.rand(*shape) * 2 - 1), sigma, mode="constant") * alpha
+        dy = gaussian_filter((random_state.rand(*shape) * 2 - 1), sigma, mode="constant") * alpha
+
+        x, y = np.meshgrid(np.arange(shape[1]), np.arange(shape[0]))
+        indices = (y + dy).reshape(-1), (x + dx).reshape(-1)
+
+        distorted = map_coordinates(arr, indices, order=1, mode='reflect').reshape(shape)
+        return Image.fromarray(distorted.astype(np.uint8))
+
     def generate_augmented_data(self, input_dir, samples_per_image=100):
-        images, labels = [], []
+        images, labels = [] , []
 
         def augment_image(img):
-            # Random rotation ±20°
+            # Elastic distortion (applied with 30% chance)
+            if random.random() < 0.3:
+                img = self.elastic_transform(img, alpha=random.uniform(30, 40), sigma=random.uniform(5, 7))
+
+            # Rotation
             if random.random() < 0.7:
                 angle = random.uniform(-20, 20)
                 img = img.rotate(angle, fillcolor=0)
 
-            # Random shifts
+            # Shear
+            if random.random() < 0.5:
+                shear = random.uniform(-0.3, 0.3)
+                img = img.transform(img.size, Image.Transform.AFFINE,
+                                    (1, shear, 0, shear, 1, 0),
+                                    fillcolor=0)
+
+            # Shifts
             if random.random() < 0.7:
                 dx, dy = random.randint(-3, 3), random.randint(-3, 3)
                 img = ImageChops.offset(img, dx, dy)
 
-            # Random contrast
+            # Scaling
             if random.random() < 0.5:
-                factor = random.uniform(0.7, 1.3)
-                img = ImageEnhance.Contrast(img).enhance(factor)
+                scale = random.uniform(0.7, 1.3)
+                new_size = int(img.size[0] * scale), int(img.size[1] * scale)
+                img = img.resize(new_size, Image.Resampling.LANCZOS)
+                canvas = Image.new("L", (28, 28), color=0)
+                x_off = (28 - new_size[0]) // 2
+                y_off = (28 - new_size[1]) // 2
+                canvas.paste(img, (x_off, y_off))
+                img = canvas
 
-            # Random brightness
+            # Contrast & brightness
             if random.random() < 0.5:
-                factor = random.uniform(0.7, 1.3)
-                img = ImageEnhance.Brightness(img).enhance(factor)
+                img = ImageEnhance.Contrast(img).enhance(random.uniform(0.7, 1.3))
+            if random.random() < 0.5:
+                img = ImageEnhance.Brightness(img).enhance(random.uniform(0.7, 1.3))
 
-            # Stroke thickness (dilate/erode effect)
-            if random.random() < 0.5:
-                img = img.filter(ImageFilter.MaxFilter(3))  # thicken
-            elif random.random() < 0.5:
-                img = img.filter(ImageFilter.MinFilter(3))  # thin
+            # Stroke thickness
+            if random.random() < 0.3:
+                img = img.filter(ImageFilter.MaxFilter(3))
+            elif random.random() < 0.3:
+                img = img.filter(ImageFilter.MinFilter(3))
+
+            # Blur / noise
+            if random.random() < 0.3:
+                img = img.filter(ImageFilter.GaussianBlur(radius=random.uniform(0.5, 1.0)))
+            if random.random() < 0.2:
+                arr = np.array(img).astype(np.float32)
+                noise = np.random.normal(0, 25, arr.shape)
+                arr = np.clip(arr + noise, 0, 255).astype(np.uint8)
+                img = Image.fromarray(arr)
+
+            # Occasionally invert
+            if random.random() < 0.1:
+                img = ImageOps.invert(img)
 
             return img
 
         for file in os.listdir(input_dir):
             if not file.endswith(".png"):
                 continue
-
-            # Label = first character of filename (e.g., "2.png" -> 2)
             label_str = os.path.splitext(file)[0][0]
             if not label_str.isdigit():
                 continue
