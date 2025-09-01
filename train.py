@@ -14,6 +14,7 @@ batch_size = 64
 cycles = 20
 
 def train():
+    start_time = time.time()
 
     np.random.seed(100)
 
@@ -31,7 +32,7 @@ def train():
     print(f"Starting training for {cycles} cycles...")
 
     for cycle in range(cycles):
-        start_time = time.time()
+        cycle_start_time = time.time()
         cycle_loss = 0
         cycle_accuracy = 0
 
@@ -56,7 +57,7 @@ def train():
 
         test_accuracy, test_loss = evaluate_model(neural_network, test_images, test_labels)
 
-        cycle_time = time.time() - start_time
+        cycle_time = time.time() - cycle_start_time
         print(
             f"Cycle {cycle + 1}/{cycles} completed in {cycle_time:.2f}s "
             f"Avg. Loss: {cycle_loss/num_batches:.4f} "
@@ -69,8 +70,12 @@ def train():
     print("Training completed")
 
     final_accuracy, final_loss = evaluate_model(neural_network, test_images, test_labels)
-    print(f"Final Test Accuracy: {final_accuracy:.4f}%")
-    print(f"Final Test Loss: {final_loss:.4f}")
+    training_time = time.time() - start_time
+    print(
+        f"Final Test Accuracy: {final_accuracy:.4f}%\n"
+        f"Final Test Loss: {final_loss:.4f}\n"
+        f"Training took {training_time:.1f}s\n"
+        )
 
     print("Saving network parameters...")
     os.makedirs("model", exist_ok=True)

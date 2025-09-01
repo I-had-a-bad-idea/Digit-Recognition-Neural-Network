@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter, ImageChops, ImageOps
-import random, cv2
+import random
 from scipy.ndimage import gaussian_filter, map_coordinates
 
 
