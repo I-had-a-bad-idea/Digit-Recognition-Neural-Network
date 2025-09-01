@@ -7,9 +7,9 @@ from neural_network import NeuralNetwork
 from utils import evaluate_model
 
 input_size = 784
-hidden_size = 128
+hidden_layers = [128, 128]
 output_size = 10
-learning_rate = 0.5 # 0.5 = Final Test Accuracy: 98.87-98.91
+learning_rate = 0.5
 batch_size = 64
 cycles = 20
 
@@ -20,7 +20,7 @@ def train():
     print("Loaded MNIST dataset!")
 
     print("Initializing network")
-    neural_network = NeuralNetwork(input_size, hidden_size, output_size, learning_rate)
+    neural_network = NeuralNetwork(input_size, hidden_layers, output_size, learning_rate)
     print("Network initialized")
 
     num_samples = train_images.shape[0]
@@ -70,13 +70,22 @@ def train():
     print(f"Final Test Loss: {final_loss:.4f}")
 
     print("Saving network parameters...")
-    os.makedirs("models", exist_ok=True)
-    np.save("model/w1.npy", neural_network.w1)
-    np.save("model/b1.npy", neural_network.b1)
-    np.save("model/w2.npy", neural_network.w2)
-    np.save("model/b2.npy", neural_network.b2)
-    
-    print("Model saved")
+    os.makedirs("model", exist_ok=True)
 
+    # Save metadata (layer sizes, learning rate, etc.)
+    metadata = {
+        "input_size": input_size,
+        "hidden_layers": [w.shape[1] for w in neural_network.weights[:-1]],
+        "output_size": output_size,
+        "learning_rate": neural_network.learning_rate,
+    }
+    np.savez("model/metadata.npz", **metadata)
+
+    # Save weights and biases
+    for i, (w, b) in enumerate(zip(neural_network.weights, neural_network.biases)):
+        np.save(f"model/w{i}.npy", w)
+        np.save(f"model/b{i}.npy", b)
+
+    print("Model saved")
 
 train()

@@ -7,17 +7,20 @@ from data.augment_external_digits import Augmented_digits_generator
 
 
 def load_model():
-    w1 = np.load("model/w1.npy")
-    b1 = np.load("model/b1.npy")
-    w2 = np.load("model/w2.npy")
-    b2 = np.load("model/b2.npy")
+    metadata_npz = np.load("model/metadata.npz", allow_pickle=True)
+    metadata = {k: metadata_npz[k].tolist() for k in metadata_npz}
+    input_size = metadata["input_size"]
+    hidden_layers = metadata["hidden_layers"]
+    output_size = metadata["output_size"]
+    learning_rate = metadata["learning_rate"]
 
-    input_size = w1.shape[0]
-    hidden_size = w1.shape[1]
-    output_size = w2.shape[1]
+    model = NeuralNetwork(input_size, hidden_layers, output_size, learning_rate)
 
-    model = NeuralNetwork(input_size, hidden_size, output_size)
-    model.w1, model.b1, model.w2, model.b2 = w1, b1, w2, b2  # load weights
+    # Load all layers
+    for i in range(len(model.weights)):
+        model.weights[i] = np.load(f"model/w{i}.npy")
+        model.biases[i] = np.load(f"model/b{i}.npy")
+
     return model
 
 

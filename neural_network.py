@@ -2,80 +2,85 @@ import numpy as np
 from utils import calculate_loss, calculate_accuracy
 
 class NeuralNetwork:
-        def __init__(self, input_size, hidden_size, output_size, learning_rate=0.01):
-            
-            self.w1 = np.random.randn(input_size, hidden_size) * np.sqrt(2 / input_size)
-            self.b1 = np.zeros((1, hidden_size))
-            self.w2 = np.random.randn(hidden_size, output_size) * np.sqrt(2 / hidden_size)
-            self.b2 = np.zeros((1, output_size))
-            self.learning_rate = learning_rate
+    def __init__(self, input_size, hidden_layers, output_size, learning_rate=0.01):
+        self.learning_rate = learning_rate
 
+        layer_sizes = [input_size] + hidden_layers + [output_size]
 
-        def relu(self, x):
-            return np.maximum(0, x)
-        
-        def relu_derivative(self, x):
-            return np.where(x > 0, 1, 0)
-        
-        # Converts output into probability distribution 
-        def softmax(self, x):
-            exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
-            return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+        # Initialize weights and biases for all layers
+        self.weights = []
+        self.biases = []
+        for i in range(len(layer_sizes) - 1):
+            w = np.random.randn(layer_sizes[i], layer_sizes[i+1]) * np.sqrt(2 / layer_sizes[i])
+            b = np.zeros((1, layer_sizes[i+1]))
+            self.weights.append(w)
+            self.biases.append(b)
 
-        def forward_pass(self, x):
-              
-            z_1 = np.dot(x, self.w1) + self.b1
-            activation_1 = self.relu(z_1)
-            z_2 = np.dot(activation_1, self.w2) + self.b2
-            activation_2 = self.softmax(z_2)
+    def relu(self, x):
+        return np.maximum(0, x)
 
-            values = {"x": x, "z1": z_1, "a1": activation_1, "z2": z_2, "a2": activation_2}
+    def relu_derivative(self, x):
+        return np.where(x > 0, 1, 0)
 
-            return activation_2, values
-        
-        def backward_pass(self, y, values):
-            batch_size = y.shape[0]
+    def softmax(self, x):
+        exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
+        return exp_x / np.sum(exp_x, axis=1, keepdims=True)
 
-            x = values["x"]
-            activation_1 = values["a1"]
-            activation_2 = values["a2"]
-            z_1 = values["z1"]
+    def forward_pass(self, x):
+        activations = [x]
+        zs = []
 
-            error_activation_2 = activation_2 - y
-            gradient_w2 = (1 / batch_size) * np.dot(activation_1.T, error_activation_2)
-            gradient_b2 = (1 / batch_size) * np.sum(error_activation_2, axis=0, keepdims=True)
-            
-            error_activation_1 = np.dot(error_activation_2, self.w2.T)
-            error_z_1 = error_activation_1 * self.relu_derivative(z_1)
-            gradient_w1 = (1 / batch_size) * np.dot(x.T, error_z_1)
-            gradient_b1 = (1 / batch_size) * np.sum(error_z_1, axis=0, keepdims=True)
+        for i in range(len(self.weights) - 1):
+            z = np.dot(activations[-1], self.weights[i]) + self.biases[i]
+            a = self.relu(z)
+            zs.append(z)
+            activations.append(a)
 
-            gradients = {"w1": gradient_w1, "b1": gradient_b1, "w2": gradient_w2, "b2": gradient_b2}
+        # Last layer = softmax
+        z_final = np.dot(activations[-1], self.weights[-1]) + self.biases[-1]
+        a_final = self.softmax(z_final)
+        zs.append(z_final)
+        activations.append(a_final)
 
-            return gradients
+        return a_final, {"x": x, "activations": activations, "zs": zs}
 
-        def update_parameters(self, gradients):
+    def backward_pass(self, y, cache):
+        batch_size = y.shape[0]
+        activations = cache["activations"]
+        zs = cache["zs"]
 
-            self.w1 -= self.learning_rate * gradients["w1"]
-            self.b1 -= self.learning_rate * gradients["b1"]
-            self.w2 -= self.learning_rate * gradients["w2"]
-            self.b2 -= self.learning_rate * gradients["b2"]     
+        grads_w = [None] * len(self.weights)
+        grads_b = [None] * len(self.biases)
 
-        def train_step(self, x, y):
-            
-            output, values = self.forward_pass(x)
-            gradients = self.backward_pass(y, values)
+        # Output layer error
+        delta = activations[-1] - y
+        grads_w[-1] = (1 / batch_size) * np.dot(activations[-2].T, delta)
+        grads_b[-1] = (1 / batch_size) * np.sum(delta, axis=0, keepdims=True)
 
-            self.update_parameters(gradients)
-            loss = calculate_loss(output, y)
-            accuracy = calculate_accuracy(np.argmax(output, axis=1), y)
+        # Backprop through hidden layers
+        for i in reversed(range(len(self.weights) - 1)):
+            delta = np.dot(delta, self.weights[i+1].T) * self.relu_derivative(zs[i])
+            grads_w[i] = (1 / batch_size) * np.dot(activations[i].T, delta)
+            grads_b[i] = (1 / batch_size) * np.sum(delta, axis=0, keepdims=True)
 
-            self.learning_rate *= 0.9999
+        return grads_w, grads_b
 
-            return loss, accuracy
-        
-        def predict(self, x):
-            
-            output, _ = self.forward_pass(x)
-            return np.argmax(output, axis=1)
-        
+    def update_parameters(self, grads_w, grads_b):
+        for i in range(len(self.weights)):
+            self.weights[i] -= self.learning_rate * grads_w[i]
+            self.biases[i] -= self.learning_rate * grads_b[i]
+
+    def train_step(self, x, y):
+        output, cache = self.forward_pass(x)
+        grads_w, grads_b = self.backward_pass(y, cache)
+        self.update_parameters(grads_w, grads_b)
+
+        loss = calculate_loss(output, y)
+        accuracy = calculate_accuracy(np.argmax(output, axis=1), y)
+
+        self.learning_rate *= 0.9999
+        return loss, accuracy
+
+    def predict(self, x):
+        output, _ = self.forward_pass(x)
+        return np.argmax(output, axis=1)
