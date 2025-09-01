@@ -4,6 +4,40 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageChops
 import random
 
 class Augmented_digits_generator:
+    def preprocess_digit(self, arr):
+        if isinstance(arr, Image.Image):
+            arr = np.array(arr.convert("L"))
+
+        if arr.ndim == 3 and arr.shape[-1] == 1:
+            arr = arr.squeeze(-1)
+
+        arr = (arr > 128).astype(np.uint8) * 255
+
+        coords = np.argwhere(arr > 0)
+        if coords.shape[0] == 0:
+            return np.zeros(784, dtype=np.float32)
+
+        y0, x0 = coords.min(axis=0)
+        y1, x1 = coords.max(axis=0) + 1
+        cropped = arr[y0:y1, x0:x1]
+
+        h, w = cropped.shape
+        scale = 20.0 / max(h, w)
+        new_w, new_h = int(round(w * scale)), int(round(h * scale))
+        pil_img = Image.fromarray(cropped).resize((new_w, new_h), Image.Resampling.LANCZOS)
+        digit = np.array(pil_img)
+
+        coords = np.argwhere(digit > 0)
+        y_center, x_center = coords.mean(axis=0)
+        canvas = np.zeros((28, 28), dtype=np.uint8)
+        y_offset = int(round(14 - y_center))
+        x_offset = int(round(14 - x_center))
+        y_start, x_start = max(0, y_offset), max(0, x_offset)
+        y_end, x_end = min(28, y_offset + new_h), min(28, x_offset + new_w)
+        canvas[y_start:y_end, x_start:x_end] = digit[0:(y_end-y_start), 0:(x_end-x_start)]
+
+        return (canvas.astype(np.float32) / 255.0).reshape(784)
+
     def generate_augmented_data(self, input_dir, samples_per_image=100):
         images, labels = [], []
 
@@ -36,7 +70,6 @@ class Augmented_digits_generator:
 
             return img
 
-        # Iterate through labeled PNGs
         for file in os.listdir(input_dir):
             if not file.endswith(".png"):
                 continue
@@ -51,14 +84,8 @@ class Augmented_digits_generator:
 
             for _ in range(samples_per_image):
                 img = augment_image(base_img)
-
-                # Resize/center to 28x28
-                arr = np.array(img)
-                arr = (arr > 128).astype(np.uint8) * 255
-                pil_img = Image.fromarray(arr).resize((28, 28), Image.Resampling.LANCZOS)
-
-                arr = np.array(pil_img).astype(np.float32) / 255.0
-                images.append(arr.flatten())
+                arr = self.preprocess_digit(img)
+                images.append(arr)
                 labels.append(label)
 
         return np.array(images, dtype=np.float32), np.array(labels, dtype=np.int64)
