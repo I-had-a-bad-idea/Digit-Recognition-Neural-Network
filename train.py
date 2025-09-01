@@ -7,13 +7,15 @@ from neural_network import NeuralNetwork
 from utils import evaluate_model
 
 input_size = 784
-hidden_layers = [128, 128]
+hidden_layers = [256, 128]
 output_size = 10
 learning_rate = 0.5
 batch_size = 64
 cycles = 20
 
 def train():
+
+    np.random.seed(100)
 
     print("Loading MNIST dataset...")
     train_images, train_labels, test_images, test_labels = load_data()
