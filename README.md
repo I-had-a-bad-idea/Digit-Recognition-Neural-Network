@@ -104,6 +104,8 @@ The model will:
 - Save model parameters in `model/`
 - Display real-time training metrics
 
+> **Tip:** You can add your own handwritten digit images into the `data/external_digits/` folder. They will be automatically included in training and can significantly improve recognition of your personal writing style.
+
 ### Prediction
 
 To recognize digits:
