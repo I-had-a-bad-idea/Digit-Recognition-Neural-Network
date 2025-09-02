@@ -39,9 +39,9 @@ A neural network implementation for handwritten digit recognition using the EMNI
 
 The default parameters are:
 - Initial learning rate: 0.5
-- Batch size: 64
+- Batch size: 128
 - Training cycles: 20
-- Hidden layer sizes: [256, 128]
+- Hidden layer sizes: [128, 128]
 
 These can be modified in `train.py` to experiment with different configurations.
 
@@ -50,8 +50,8 @@ These can be modified in `train.py` to experiment with different configurations.
 ## Performance
 
 - Training accuracy: ~98.8%
-- Test accuracy: ~98.9% on EMNIST test set
-- Training time: ~5-10 minutes depending on CPU
+- Test accuracy: ~98.7% on EMNIST test set
+- Training time: ~3-7 minutes depending on CPU
 - Memory usage: ~65MB RAM during training
 
 ---
