@@ -4,6 +4,17 @@ A neural network implementation for handwritten digit recognition using the EMNI
 
 ---
 
+## Overview
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Implementation Details](#implementation-details)
+- [Contributing](#contributing)
+
+---
+
 ## Features
 
 - Pure NumPy implementation (no deep learning frameworks)
