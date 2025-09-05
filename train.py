@@ -11,12 +11,13 @@ hidden_layers = [128, 128]
 output_size = 10
 learning_rate = 0.5
 batch_size = 128
-cycles = 20
+cycles = 10
+
+starting_seed = 95
+number_of_seeds = 5
 
 def train():
     start_time = time.time()
-
-    np.random.seed(100)
 
     print("Loading MNIST dataset...")
     train_images, train_labels, test_images, test_labels = load_data()
@@ -29,44 +30,47 @@ def train():
     num_samples = train_images.shape[0]
     num_batches = num_samples // batch_size
 
-    print(f"Starting training for {cycles} cycles...")
+    print(f"Starting training for {number_of_seeds} seeds with {cycles} cycles each...")
 
-    for cycle in range(cycles):
-        cycle_start_time = time.time()
-        cycle_loss = 0
-        cycle_accuracy = 0
+    for i in range(number_of_seeds):
+        np.random.seed(starting_seed + i)
+        for cycle in range(cycles):
+            cycle_start_time = time.time()
+            cycle_loss = 0
+            cycle_accuracy = 0
 
-        indices = np.random.permutation(num_samples)
-        images = train_images[indices]
-        labels = train_labels[indices]
+            indices = np.random.permutation(num_samples)
+            images = train_images[indices]
+            labels = train_labels[indices]
 
-        for batch in range(num_batches):
-            batch_start = batch * batch_size
-            batch_end = (batch + 1) * batch_size
+            for batch in range(num_batches):
+                batch_start = batch * batch_size
+                batch_end = (batch + 1) * batch_size
 
-            x_batch = images[batch_start:batch_end]
-            y_batch = labels[batch_start:batch_end]
+                x_batch = images[batch_start:batch_end]
+                y_batch = labels[batch_start:batch_end]
 
-            loss, accuracy = neural_network.train_step(x_batch, y_batch)
-            neural_network.learning_rate = learning_rate * (0.5 * (1 + np.cos(np.pi * cycle / cycles)))
-            cycle_loss += loss
-            cycle_accuracy += accuracy
+                loss, accuracy = neural_network.train_step(x_batch, y_batch)
+                neural_network.learning_rate = learning_rate * (0.5 * (1 + np.cos(np.pi * cycle / cycles)))
+                cycle_loss += loss
+                cycle_accuracy += accuracy
 
-            if (batch + 1) % 100 == 0:
-                print(f"cycle {cycle + 1}/{cycles}, Batch {batch + 1}/{num_batches}, Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
+                if (batch + 1) % 100 == 0:
+                    print(f"seed {i + 1}/{number_of_seeds}, cycle {cycle + 1}/{cycles}, Batch {batch + 1}/{num_batches}, Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
 
-        test_accuracy, test_loss = evaluate_model(neural_network, test_images, test_labels)
+            test_accuracy, test_loss = evaluate_model(neural_network, test_images, test_labels)
 
-        cycle_time = time.time() - cycle_start_time
-        print(
-            f"Cycle {cycle + 1}/{cycles} completed in {cycle_time:.2f}s "
-            f"Avg. Loss: {cycle_loss/num_batches:.4f} "
-            f"Avg. Accuracy: {cycle_accuracy/num_batches:.4f}% "
-            f"Test Loss: {test_loss:.4f} "
-            f"Test Accuracy: {test_accuracy:.4f}% "
-            f"Learning rate: {neural_network.learning_rate} "
-        )
-    
+            cycle_time = time.time() - cycle_start_time
+            print(
+                f"Seed {i + 1}/{number_of_seeds} "
+                f"Cycle {cycle + 1}/{cycles} completed in {cycle_time:.2f}s "
+                f"Avg. Loss: {cycle_loss/num_batches:.4f} "
+                f"Avg. Accuracy: {cycle_accuracy/num_batches:.4f}% "
+                f"Test Loss: {test_loss:.4f} "
+                f"Test Accuracy: {test_accuracy:.4f}% "
+                f"Learning rate: {neural_network.learning_rate} "
+            )
+        
     print("Training completed")
 
     final_accuracy, final_loss = evaluate_model(neural_network, test_images, test_labels)
@@ -96,4 +100,5 @@ def train():
 
     print("Model saved")
 
-train()
+if __name__ == "__main__":
+    train()
