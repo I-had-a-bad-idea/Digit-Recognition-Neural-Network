@@ -1,6 +1,6 @@
 # Digit Recognition Neural Network
 
-A neural network implementation for handwritten digit recognition using the EMNIST dataset, built from scratch in Python using NumPy. The network combines EMNIST training data with custom augmented samples for improved robustness.
+A neural network implementation for handwritten digit recognition using the EMNIST dataset and custom augmentation, built from scratch in Python using NumPy.
 
 ---
 
@@ -12,8 +12,9 @@ A neural network implementation for handwritten digit recognition using the EMNI
 - Support for external digit images
 - Real-time training metrics
 - Model persistence and loading
+- Cosine annealing learning rate scheduling
+- Multiple training seeds for robustness
 - Batch processing for efficient training
-- Automatic learning rate decay
 - Custom digit preprocessing pipeline
 
 ---
@@ -23,7 +24,7 @@ A neural network implementation for handwritten digit recognition using the EMNI
 ### Network Structure
 - Input layer: 784 neurons (28x28 pixel images)
 - Hidden layers: 
-  - Layer 1: 256 neurons with ReLU activation
+  - Layer 1: 128 neurons with ReLU activation
   - Layer 2: 128 neurons with ReLU activation
 - Output layer: 10 neurons with Softmax activation
 
@@ -40,19 +41,20 @@ A neural network implementation for handwritten digit recognition using the EMNI
 The default parameters are:
 - Initial learning rate: 0.5
 - Batch size: 128
-- Training cycles: 20
+- Training cycles: 10
 - Hidden layer sizes: [128, 128]
-
+- Number of seeds: 7
+- Starting seed: 95
 These can be modified in `train.py` to experiment with different configurations.
 
 ---
 
 ## Performance
 
-- Training accuracy: ~98.8%
+- Training accuracy: ~99.2%
 - Test accuracy: ~98.7% on EMNIST test set
-- Training time: ~3-7 minutes depending on CPU
-- Memory usage: ~65MB RAM during training
+- Training time: ~5-10 minutes depending on CPU
+- Memory usage: ~1.7-2GB RAM during training
 
 ---
 
@@ -71,7 +73,7 @@ These can be modified in `train.py` to experiment with different configurations.
 ### Setup
 
 1. Clone the repository:
-```sh
+```bash
 git clone https://github.com/yourusername/Digit-Recognition-Neural-Network.git
 cd Digit-Recognition-Neural-Network
 ```
@@ -85,6 +87,12 @@ pip install numpy tensorflow-datasets pillow scipy # If you dont want to train i
 
 ## Usage
 
+### Adding Custom Training Data
+
+1. Add your own handwritten digit images to `data/external_digits/`
+2. Name files as `[digit]_[unique_something].png` (e.g., `7_01.png`)
+3. Images will be automatically augmented during training
+
 ### Training
 
 1. Download and prepare the data:
@@ -97,10 +105,10 @@ python data/get_data.py
 python train.py
 ```
 
-The model will:
-- Load and preprocess the EMNIST dataset
-- Augment training data
-- Train for 20 cycles
+The training process:
+- Loads EMNIST dataset
+- Augments training data
+- Train for 10 cycles with 7 different seeds
 - Save model parameters in `model/`
 - Display real-time training metrics
 
@@ -128,7 +136,7 @@ Then enter the path to your image when prompted.
 │   ├── metadata.npz         # Network configuration
 │   ├── w*.npy              # Layer weights
 │   └── b*.npy              # Layer biases
-├── neural_network.py        # Neural network implementation
+├── neural_network.py        # Core implementation
 ├── data_loader.py          # Data loading utilities
 ├── utils.py                # Helper functions
 ├── train.py               # Training script

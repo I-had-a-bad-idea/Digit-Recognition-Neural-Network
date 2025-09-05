@@ -14,7 +14,7 @@ batch_size = 128
 cycles = 10
 
 starting_seed = 95
-number_of_seeds = 5
+number_of_seeds = 7
 
 def train():
     start_time = time.time()
