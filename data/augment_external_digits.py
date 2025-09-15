@@ -55,68 +55,82 @@ class Augmented_digits_generator:
         distorted = map_coordinates(arr, indices, order=1, mode='reflect').reshape(shape)
         return Image.fromarray(distorted.astype(np.uint8))
 
+    def augment_image(self, img):
+        # Elastic distortion (applied with 30% chance)
+        if random.random() < 0.3:
+            img = self.elastic_transform(img, alpha=random.uniform(30, 40), sigma=random.uniform(5, 7))
+
+        # Rotation
+        if random.random() < 0.7:
+            angle = random.uniform(-20, 20)
+            img = img.rotate(angle, fillcolor=0)
+
+        # Shear
+        if random.random() < 0.5:
+            shear = random.uniform(-0.3, 0.3)
+            img = img.transform(img.size, Image.Transform.AFFINE,
+                                (1, shear, 0, shear, 1, 0),
+                                fillcolor=0)
+
+        # Shifts
+        if random.random() < 0.7:
+            dx, dy = random.randint(-3, 3), random.randint(-3, 3)
+            img = ImageChops.offset(img, dx, dy)
+
+        # Scaling
+        if random.random() < 0.5:
+            scale = random.uniform(0.7, 1.3)
+            new_size = int(img.size[0] * scale), int(img.size[1] * scale)
+            img = img.resize(new_size, Image.Resampling.LANCZOS)
+            canvas = Image.new("L", (28, 28), color=0)
+            x_off = (28 - new_size[0]) // 2
+            y_off = (28 - new_size[1]) // 2
+            canvas.paste(img, (x_off, y_off))
+            img = canvas
+
+        # Contrast & brightness
+        if random.random() < 0.5:
+            img = ImageEnhance.Contrast(img).enhance(random.uniform(0.7, 1.3))
+        if random.random() < 0.5:
+            img = ImageEnhance.Brightness(img).enhance(random.uniform(0.7, 1.3))
+
+        # Stroke thickness
+        if random.random() < 0.3:
+            img = img.filter(ImageFilter.MaxFilter(3))
+        elif random.random() < 0.3:
+            img = img.filter(ImageFilter.MinFilter(3))
+
+        # Blur / noise
+        if random.random() < 0.3:
+            img = img.filter(ImageFilter.GaussianBlur(radius=random.uniform(0.5, 1.0)))
+        if random.random() < 0.2:
+            arr = np.array(img).astype(np.float32)
+            noise = np.random.normal(0, 25, arr.shape)
+            arr = np.clip(arr + noise, 0, 255).astype(np.uint8)
+            img = Image.fromarray(arr)
+
+        # Occasionally invert
+        if random.random() < 0.1:
+            img = ImageOps.invert(img)
+
+        return img
+
+    def augment_data(self, images, labels, sample_per_image=100):
+        imgs, labls = [], []
+
+        for img, label in zip(images, labels):
+            pil_img = Image.fromarray((img.reshape(28, 28) * 255).astype(np.uint8))
+
+            for _ in range(sample_per_image):
+                aug_img = self.augment_image(pil_img)
+                arr = self.preprocess_digit(aug_img)
+                imgs.append(arr)
+                labls.append(label)
+        
+        return np.array(imgs, dtype=np.float32), np.array(labls, dtype=np.int64)
+
     def generate_augmented_data(self, input_dir, samples_per_image=100):
         images, labels = [] , []
-
-        def augment_image(img):
-            # Elastic distortion (applied with 30% chance)
-            if random.random() < 0.3:
-                img = self.elastic_transform(img, alpha=random.uniform(30, 40), sigma=random.uniform(5, 7))
-
-            # Rotation
-            if random.random() < 0.7:
-                angle = random.uniform(-20, 20)
-                img = img.rotate(angle, fillcolor=0)
-
-            # Shear
-            if random.random() < 0.5:
-                shear = random.uniform(-0.3, 0.3)
-                img = img.transform(img.size, Image.Transform.AFFINE,
-                                    (1, shear, 0, shear, 1, 0),
-                                    fillcolor=0)
-
-            # Shifts
-            if random.random() < 0.7:
-                dx, dy = random.randint(-3, 3), random.randint(-3, 3)
-                img = ImageChops.offset(img, dx, dy)
-
-            # Scaling
-            if random.random() < 0.5:
-                scale = random.uniform(0.7, 1.3)
-                new_size = int(img.size[0] * scale), int(img.size[1] * scale)
-                img = img.resize(new_size, Image.Resampling.LANCZOS)
-                canvas = Image.new("L", (28, 28), color=0)
-                x_off = (28 - new_size[0]) // 2
-                y_off = (28 - new_size[1]) // 2
-                canvas.paste(img, (x_off, y_off))
-                img = canvas
-
-            # Contrast & brightness
-            if random.random() < 0.5:
-                img = ImageEnhance.Contrast(img).enhance(random.uniform(0.7, 1.3))
-            if random.random() < 0.5:
-                img = ImageEnhance.Brightness(img).enhance(random.uniform(0.7, 1.3))
-
-            # Stroke thickness
-            if random.random() < 0.3:
-                img = img.filter(ImageFilter.MaxFilter(3))
-            elif random.random() < 0.3:
-                img = img.filter(ImageFilter.MinFilter(3))
-
-            # Blur / noise
-            if random.random() < 0.3:
-                img = img.filter(ImageFilter.GaussianBlur(radius=random.uniform(0.5, 1.0)))
-            if random.random() < 0.2:
-                arr = np.array(img).astype(np.float32)
-                noise = np.random.normal(0, 25, arr.shape)
-                arr = np.clip(arr + noise, 0, 255).astype(np.uint8)
-                img = Image.fromarray(arr)
-
-            # Occasionally invert
-            if random.random() < 0.1:
-                img = ImageOps.invert(img)
-
-            return img
 
         for file in os.listdir(input_dir):
             if not file.endswith(".png"):
@@ -129,7 +143,7 @@ class Augmented_digits_generator:
             base_img = Image.open(os.path.join(input_dir, file)).convert("L")
 
             for _ in range(samples_per_image):
-                img = augment_image(base_img)
+                img = self.augment_image(base_img)
                 arr = self.preprocess_digit(img)
                 images.append(arr)
                 labels.append(label)
