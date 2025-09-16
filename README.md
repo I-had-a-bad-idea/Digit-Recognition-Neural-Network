@@ -23,7 +23,6 @@ A neural network implementation for handwritten digit recognition using the EMNI
 - Support for external digit images
 - Real-time training metrics
 - Model persistence and loading
-- Cosine annealing learning rate scheduling
 - Multiple training seeds for robustness
 - Batch processing for efficient training
 - Custom digit preprocessing pipeline
@@ -35,9 +34,9 @@ A neural network implementation for handwritten digit recognition using the EMNI
 ### Network Structure
 - Input layer: 784 neurons (28x28 pixel images)
 - Hidden layers: 
-  - Layer 1: 128 neurons with ReLU activation
-  - Layer 2: 128 neurons with ReLU activation
-- Output layer: 10 neurons with Softmax activation
+  - Layer 1: 128 neurons with ReLU 
+  - Layer 2: 128 neurons with ReLU 
+- Output layer: 10 neurons with Softmax
 
 ### Components
 - Loss function: Cross-entropy loss
@@ -45,7 +44,7 @@ A neural network implementation for handwritten digit recognition using the EMNI
   - Hidden layers: ReLU (Rectified Linear Unit)
   - Output layer: Softmax
 - Weight initialization: He initialization
-- Learning rate: 0.5 with Cosine Annealing
+
 
 ## Parameters
 
@@ -56,6 +55,7 @@ The default parameters are:
 - Hidden layer sizes: [128, 128]
 - Number of seeds: 7
 - Starting seed: 95
+- 
 These can be modified in `train.py` to experiment with different configurations.
 
 ---
@@ -85,13 +85,14 @@ These can be modified in `train.py` to experiment with different configurations.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/Digit-Recognition-Neural-Network.git
+git clone https://github.com/I-had-a-bad-idea/Digit-Recognition-Neural-Network.git
 cd Digit-Recognition-Neural-Network
 ```
 
 2. Install dependencies:
 ```sh
-pip install numpy tensorflow-datasets pillow scipy # If you dont want to train it, you only need numpy
+pip install numpy tensorflow-datasets pillow scipy
+# If you dont want to train it, you only need numpy
 ```
 
 ---
@@ -102,7 +103,7 @@ pip install numpy tensorflow-datasets pillow scipy # If you dont want to train i
 
 1. Add your own handwritten digit images to `data/external_digits/`
 2. Name files as `[digit]_[unique_something].png` (e.g., `7_01.png`)
-3. Images will be automatically augmented during training
+3. Images will be automatically included during training
 
 ### Training
 
@@ -118,10 +119,9 @@ python train.py
 
 The training process:
 - Loads EMNIST dataset
-- Augments training data
-- Train for 10 cycles with 7 different seeds
-- Save model parameters in `model/`
-- Display real-time training metrics
+- Trains for 10 cycles with 7 different seeds
+- Saves model parameters in `model/`
+- Displays real-time training metrics
 
 > **Tip:** You can add your own handwritten digit images into the `data/external_digits/` folder. They will be automatically included in training and can significantly improve recognition of your personal writing style.
 
@@ -177,7 +177,6 @@ Then enter the path to your image when prompted.
 - Automatic learning rate decay
 - Random batch shuffling
 - Real-time accuracy monitoring
-- Model checkpointing
 
 ---
 
