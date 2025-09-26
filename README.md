@@ -67,6 +67,10 @@ These can be modified in `train.py` to experiment with different configurations.
 - Training time: ~5-10 minutes depending on CPU
 - Memory usage: ~1.7-2GB RAM during training
 
+### Datasets Used
+- EMNIST dataset (primary dataset)
+- [HWD-1000 dataset](https://github.com/niklashenning/hwd-1000-dataset) for additional training samples
+
 ---
 
 ## Installation

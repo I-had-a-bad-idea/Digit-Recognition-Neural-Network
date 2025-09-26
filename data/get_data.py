@@ -13,10 +13,14 @@ print("Loaded EMNIST digits!")
 
 augmented_digits_generator = Augmented_digits_generator()
 
-print("Generating augmented digits...")
+print("Generating augmented external_digits...")
 # Generate synthetic digits from PNGs
-x_extra, y_extra = augmented_digits_generator.generate_augmented_data("E:/Digit-Recognition-Neural-Network/data/external_digits", samples_per_image=1000)
-print("Generated augmented pictures!")
+x_external, y_external = augmented_digits_generator.generate_augmented_data("data/external_digits", samples_per_image=1000)
+print("Generated augmented external_digits!")
+
+print("Generating extra augmented trainig data...")
+x_extra, y_extra = augmented_digits_generator.generate_augmented_data("data/external_digits/img", samples_per_image=5)
+print("Generated extra augmented training data!")
 
 # Convert dataset to NumPy
 def to_numpy(dataset, preprocess_fn):
@@ -42,10 +46,10 @@ y_train_one_hot[np.arange(y_train.size), y_train] = 1
 y_test_one_hot = np.zeros((y_test.size, num_classes))
 y_test_one_hot[np.arange(y_test.size), y_test] = 1
 
-print("Merging EMNIST and external digits...")
+print("Merging EMNIST, external digits and extra training data...")
 # Merge PNGs with EMNIST
-x_train = np.concatenate([x_train, x_extra], axis=0)
-y_train = np.concatenate([y_train, y_extra], axis=0)
+x_train = np.concatenate([x_train, x_external], axis=0)
+y_train = np.concatenate([y_train, y_external], axis=0)
 
 # Rebuild one-hot labels
 y_train_one_hot = np.zeros((y_train.size, num_classes))
