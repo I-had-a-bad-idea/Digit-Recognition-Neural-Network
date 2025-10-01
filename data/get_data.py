@@ -19,7 +19,7 @@ x_external, y_external = augmented_digits_generator.generate_augmented_data("dat
 print("Generated augmented external_digits!")
 
 print("Generating extra augmented trainig data...")
-x_extra, y_extra = augmented_digits_generator.generate_augmented_data("data/external_digits/img", samples_per_image=5)
+x_extra, y_extra = augmented_digits_generator.generate_augmented_data("data/external_digits/img", samples_per_image=100)
 print("Generated extra augmented training data!")
 
 # Convert dataset to NumPy
